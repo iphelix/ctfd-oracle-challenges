@@ -1,6 +1,6 @@
 # CTFd Oracle Challenges
 
-When creating a challenge, an endpoint for an "oracle" is specified. This oracle handles challenge deployment and testing. It must respond to a post request to `/create` and `/attempt`.
+When creating a challenge, an endpoint for an "oracle" is specified. This oracle handles challenge deployment and testing. It must respond to a post request to `/create` and `/attempt`. Supports both team and user only games.
 
 # Installation
 Clone into CTFd plugins directory.
