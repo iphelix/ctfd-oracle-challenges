@@ -32,7 +32,7 @@ addr_queue = queue.Queue(maxsize=10)
 @app.route("/create", methods=["POST"])
 def create():
     """
-    Create challenge given a team_id. If force_new is true,
+    Create challenge given a player_id. If force_new is true,
     a new instance must be created and the old instance may be deleted.
 
     Return a description containing any
@@ -41,41 +41,41 @@ def create():
     > return challenge_details
     """
     data = request.form or request.get_json()
-    team_id = str(data["team_id"])
+    player_id = str(data["player_id"])
     force_new = data.get("force_new")
 
-    if force_new or team_id not in challenges:
+    if force_new or player_id not in challenges:
         # TODO: This will block. Maybe it's better to return an error, like
         # "no challenge available. Please retry in a minute."
-        challenges[team_id] = addr_queue.get()
-        logger.info("New challenge for team %s: %s", team_id, challenges[team_id])
+        challenges[player_id] = addr_queue.get()
+        logger.info("New challenge for player %s: %s", player_id, challenges[player_id])
 
     return (
         "Cause the contract at "
         '<a href="https://ropsten.etherscan.io/address/{addr}">{addr}</a> '
         "to selfdestruct itself."
-    ).format(addr=challenges[team_id])
+    ).format(addr=challenges[player_id])
 
 
 @app.route("/attempt", methods=["POST"])
 def check_solve():
     """
-    Check a solve, given a team_id
+    Check a solve, given a player_id
 
     Return with a 200 code on successful solve or abort on
     a failed solve attempt
     """
     data = request.form or request.get_json()
 
-    team_id = str(data["team_id"])
-
+    #
+    player_id = str(data["player_id"])
     try:
-        addr = challenges[team_id]
+        addr = challenges[player_id]
     except KeyError:
         abort(401)
 
     logger.info(
-        "Checking for solving of challenge at address %s for team %s", addr, team_id
+        "Checking for solving of challenge at address %s for team %s", addr, player_id
     )
 
     if len(w3.eth.getCode(addr)) > 2:

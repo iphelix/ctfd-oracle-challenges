@@ -12,7 +12,7 @@ challenges = {}
 @app.route("/create", methods=["POST"])
 def create():
     """
-    Create challenge given a team_id. If force_new is true,
+    Create challenge given a player_id. If force_new is true,
     a new instance must be created and the old instance may be deleted.
 
     Return a description containing any
@@ -21,34 +21,34 @@ def create():
     > return challenge_details
     """
     data = request.form or request.get_json()
-    team_id = str(data["team_id"])
+    player_id = str(data["player_id"])
     force_new = data["force_new"]
 
     if force_new:
-        challenges[team_id] = "CHALLENGE_DETAILS-" + str(random.randint(0, 1000000000))
+        challenges[player_id] = "CHALLENGE_DETAILS-" + str(random.randint(0, 1000000000))
 
     try:
-        challenges[team_id]
+        challenges[player_id]
     except KeyError:
-        challenges[team_id] = "CHALLENGE_DETAILS-" + str(random.randint(0, 1000000000))
+        challenges[player_id] = "CHALLENGE_DETAILS-" + str(random.randint(0, 1000000000))
 
-    return challenges[team_id]
+    return challenges[player_id]
 
 
 @app.route("/attempt", methods=["POST"])
 def check_solve():
     """
-    Check a solve, given a team_id
+    Check a solve, given a player_id
 
     Return with a 200 code on successful solve or abort on
     a failed solve attempt
     """
     data = request.form or request.get_json()
 
-    team_id = str(data["team_id"])
+    player_id = str(data["player_id"])
 
     try:
-        challenge = challenges[team_id]
+        challenge = challenges[player_id]
     except KeyError:
         abort(401)
 
