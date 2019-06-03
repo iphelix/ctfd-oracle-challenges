@@ -15,8 +15,9 @@ from CTFd.models import (
     Tags,
     Hints,
 )
+from CTFd.utils.modes import TEAMS_MODE, USERS_MODE
 from CTFd import utils
-from CTFd.utils.user import get_ip, is_admin, get_current_team
+from CTFd.utils.user import get_ip, is_admin, get_current_team, get_current_user
 from CTFd.utils.uploads import upload_file, delete_file
 from CTFd.utils.decorators.visibility import check_challenge_visibility
 from CTFd.utils.decorators import during_ctf_time_only, require_verified_emails
@@ -145,11 +146,15 @@ class OracleChallenge(BaseChallenge):
         data = request.form or request.get_json()
         # submission = data["submission"].strip()
         # instance_id = submission
-        team_id = get_current_team().id
+
+        if utils.get_config("user_mode") == TEAMS_MODE:
+            player_id = get_current_team().id
+        else:
+            player_id = get_current_user().id
 
         try:
             r = requests.post(
-                str(challenge.oracle) + "/attempt", json={"team_id": team_id}
+                str(challenge.oracle) + "/attempt", json={"player_id": player_id}
             )
         except requests.exceptions.ConnectionError:
             return False, "Challenge oracle is not available. Talk to an admin."
@@ -259,13 +264,17 @@ def load(app):
 
         data = request.form or request.get_json()
 
-        team_id = get_current_team().id
+        if utils.get_config("user_mode") == TEAMS_MODE:
+            player_id = get_current_team().id
+        else:
+            player_id = get_current_user().id
+
         force_new = data["force_new"]
 
         try:
             r = requests.post(
                 str(challenge.oracle) + "/create",
-                json={"team_id": team_id, "force_new": force_new},
+                json={"player_id": player_id, "force_new": force_new},
             )
         except requests.exceptions.ConnectionError:
             return "ERROR: Challenge oracle is not available. Talk to an admin."
