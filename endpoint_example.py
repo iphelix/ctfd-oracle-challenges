@@ -46,13 +46,17 @@ def check_solve():
     data = request.form or request.get_json()
 
     player_id = str(data["player_id"])
+    submission = str(data.get("submission"))
 
     try:
         challenge = challenges[player_id]
+        if (challenges[player_id] != submission):
+            abort(401)
     except KeyError:
         abort(401)
 
     return "Success"
+
 
 
 app.run(debug=True, threaded=True, host="127.0.0.1", port=4001)

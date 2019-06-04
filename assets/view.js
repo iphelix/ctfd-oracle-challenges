@@ -20,7 +20,7 @@ window.challenge.postRender = function () {
 
 window.challenge.submit = function (cb, preview) {
     var challenge_id = parseInt($('#challenge-id').val());
-    var submission = "Oracle Solve Attempt"
+    var submission = $('#submission-input').val() || "Oracle Solve Attempt";
     var url = "/api/v1/challenges/attempt";
 
     if (preview) {
@@ -92,4 +92,3 @@ newChallenge = function() {
         $("#oracle-details").html(response);
     });
 };
-

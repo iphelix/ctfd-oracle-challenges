@@ -85,6 +85,8 @@ class OracleChallenge(BaseChallenge):
             "state": challenge.state,
             "max_attempts": challenge.max_attempts,
             "type": challenge.type,
+            "oracle_input": "True" if challenge.oracle_input else "False",
+            "oracle_refresh": "True" if challenge.oracle_refresh else "False",
             "type_data": {
                 "id": OracleChallenge.id,
                 "name": OracleChallenge.name,
@@ -106,6 +108,9 @@ class OracleChallenge(BaseChallenge):
         """
         data = request.form or request.get_json()
         for attr, value in data.items():
+
+            if attr in ("oracle_input", "oracle_refresh"):
+                value = True if value.lower() == "true" else False
             setattr(challenge, attr, value)
 
         db.session.commit()
@@ -144,8 +149,8 @@ class OracleChallenge(BaseChallenge):
         :return: (boolean, string)
         """
         data = request.form or request.get_json()
-        # submission = data["submission"].strip()
-        # instance_id = submission
+
+        submission = str(data.get("submission")).strip() if challenge.oracle_input else "No flags for this challenge"
 
         if utils.get_config("user_mode") == TEAMS_MODE:
             player_id = get_current_team().id
@@ -154,7 +159,7 @@ class OracleChallenge(BaseChallenge):
 
         try:
             r = requests.post(
-                str(challenge.oracle) + "/attempt", json={"player_id": player_id}
+                str(challenge.oracle) + "/attempt", json={"player_id": player_id, "submission": submission}
             )
         except requests.exceptions.ConnectionError:
             return False, "Challenge oracle is not available. Talk to an admin."
@@ -181,7 +186,7 @@ class OracleChallenge(BaseChallenge):
         :return:
         """
         data = request.form or request.get_json()
-        submission = "No flags for this challenge"
+        submission = str(data.get('submission')).strip() if challenge.oracle_input else "No flags for this challenge"
         solve = Solves(
             user_id=user.id,
             team_id=team.id if team else None,
@@ -234,18 +239,20 @@ class OracleChallenges(Challenges):
     __mapper_args__ = {"polymorphic_identity": "oracle"}
     id = db.Column(None, db.ForeignKey("challenges.id"), primary_key=True)
     oracle = db.Column(db.String(255), default="")
+    oracle_input = db.Column(db.Boolean, default=True)
+    oracle_refresh = db.Column(db.Boolean, default=True)
 
     def __init__(self, *args, **kwargs):
         super(OracleChallenges, self).__init__(**kwargs)
         self.oracle = kwargs["oracle"]
+        self.oracle_input = bool(kwargs["oracle_input"])
+        self.oracle_refresh = bool(kwargs["oracle_refresh"])
 
 
 def load(app):
     app.db.create_all()
     CHALLENGE_CLASSES["oracle"] = OracleChallenge
-    register_plugin_assets_directory(
-        app, base_path="/plugins/oracle_challenges/assets/"
-    )
+    register_plugin_assets_directory(app, base_path='/plugins/oracle_challenges/assets/')
 
     @check_challenge_visibility
     @during_ctf_time_only

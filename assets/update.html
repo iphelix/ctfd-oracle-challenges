@@ -36,6 +36,30 @@
 	</div>
 
 	<div class="form-group">
+		<label>
+			Enable user input field.<br>
+			<small class="form-text text-muted">Players can submit text input to the oracle.</small>
+		</label>
+
+		<select class="form-control" name="oracle_input" >
+			<option value="True"{% if challenge.oracle_input == True %} selected{% endif %}>True</option>
+			<option value="False"{% if challenge.oracle_input == False %} selected{% endif %}>False</option>
+		</select>
+	</div>
+
+	<div class="form-group">
+		<label>
+			Enable challenge refresh button.<br>
+			<small class="form-text text-muted">Players can request a new challenge.</small>
+		</label>
+
+		<select class="form-control" name="oracle_refresh" >
+			<option value="True"{% if challenge.oracle_refresh == True %} selected{% endif %}>True</option>
+			<option value="False"{% if challenge.oracle_refresh == False %} selected{% endif %}>False</option>
+		</select>
+	</div>
+
+	<div class="form-group">
 		<label for="value">
 			Value<br>
 			<small class="form-text text-muted">
